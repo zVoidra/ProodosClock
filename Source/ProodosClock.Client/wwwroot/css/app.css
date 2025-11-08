@@ -75,3 +75,8 @@
 code {
     color: #c02d76;
 }
+
+body {
+  background: black;
+  font: white;
+}

@@ -1,0 +1,25 @@
+﻿
+<div class="clock-div">
+  <h1>Clock</h1>
+  <h1>@TimeClock</h1>
+</div>
+
+@code {
+  public DateTime TimeClock = DateTime.Now;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await base.OnInitializedAsync();
+    StartTimer();
+  }
+
+  async Task StartTimer()
+  {
+    while (true)
+    {
+      TimeClock = DateTime.Now;
+      await InvokeAsync(StateHasChanged);
+      await Task.Delay(1000);
+    }
+  }
+}
