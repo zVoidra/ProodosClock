@@ -1,0 +1,63 @@
+name: Deploy Blazor WASM to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish
+        run: |
+          dotnet restore
+          dotnet publish -c Source/ProodosClock.Client/ProodosClock.Client.csproj -o build
+
+      # Patch base href for PROJECT PAGES: username.github.io/REPO
+      # If you're deploying to a USER/ORG site (username.github.io), delete this step.
+      - name: Set <base href> to /{repo}/
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          INDEX="build/wwwroot/index.html"
+          sed -i "s|<base href=\"/\" />|<base href=\"/${REPO}/\" />|" "$INDEX"
+
+      # Ensure client-side routing works on refresh (copy index.html to 404.html)
+      - name: Add SPA fallback (404.html)
+        run: cp build/wwwroot/index.html build/wwwroot/404.html
+
+      # Disable Jekyll so _framework is served
+      - name: Add .nojekyll
+        run: touch build/wwwroot/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/wwwroot
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
