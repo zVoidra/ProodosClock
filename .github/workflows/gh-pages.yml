@@ -29,7 +29,7 @@ jobs:
       - name: Publish
         run: |
           dotnet restore
-          dotnet publish -c Source/ProodosClock.Client/ProodosClock.Client.csproj -o build
+          dotnet publish Source/ -c Build -o build
 
       # Patch base href for PROJECT PAGES: username.github.io/REPO
       # If you're deploying to a USER/ORG site (username.github.io), delete this step.
