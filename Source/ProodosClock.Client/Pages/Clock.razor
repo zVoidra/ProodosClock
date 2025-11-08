@@ -1,16 +1,20 @@
-﻿
+﻿@using System.Globalization
+
 <div class="clock-div">
   <h1>Clock</h1>
   <h1>@TimeClock</h1>
+  <h1>Week @WeekNumber</h1>
 </div>
 
 @code {
   public DateTime TimeClock = DateTime.Now;
+  public int WeekNumber = 0;
 
   protected override async Task OnInitializedAsync()
   {
     await base.OnInitializedAsync();
     StartTimer();
+    FindAndSetTheWeekOfTheYear();
   }
 
   async Task StartTimer()
@@ -21,5 +25,14 @@
       await InvokeAsync(StateHasChanged);
       await Task.Delay(1000);
     }
+  }
+
+  void FindAndSetTheWeekOfTheYear()
+  {
+    WeekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(
+      DateTime.Now,
+      CalendarWeekRule.FirstFourDayWeek,
+      DayOfWeek.Monday
+    );    
   }
 }
